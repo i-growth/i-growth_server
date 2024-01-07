@@ -21,10 +21,10 @@ app.use((req, res, next) => {
 
 // Parent
 
+app.use('/public', PublicRoutes);
 app.use('/midwife', MidwifeRoutes);
 app.use('/officer', OfficerRoutes)
 app.use('/admin', AdminRoutes);
-app.use('/public', PublicRoutes);
 
 
 app.listen(PORT, ()=>{
