@@ -51,3 +51,18 @@ export const MidwifeLogout = async(req, res, next) => {
         })
     }
 }
+
+export const getAllParents = async(req, res, next) => {
+    try{
+        const [rows] = await pool.query('SELECT * FROM parent');
+        return res.status(200).json({
+            message: 'Get all parents success',
+            data: rows
+        })
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}

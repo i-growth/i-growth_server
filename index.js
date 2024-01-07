@@ -1,11 +1,11 @@
 import express from 'express';
 const app = express();
 import cookieParser from 'cookie-parser';
-import { PORT } from '../resource/config.js';
-import AdminRoutes from '../routers/AdminRoutes.js';
-import MidwifeRoutes from '../routers/MidwifeRoutes.js';
-import OfficerRoutes from '../routers/OfficerRoutes.js';
-import PublicRoutes from '../routers/PublicRoutes.js';
+import { PORT } from './resource/config.js';
+import AdminRoutes from './routers/AdminRoutes.js';
+import MidwifeRoutes from './routers/MidwifeRoutes.js';
+import OfficerRoutes from './routers/OfficerRoutes.js';
+import PublicRoutes from './routers/PublicRoutes.js';
 
 
 app.use(express.json());

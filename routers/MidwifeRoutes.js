@@ -1,12 +1,12 @@
 import express from 'express';
 const router = express.Router();
 import session from 'express-session';
-import { MidwifeLogin, MidwifeLogout } from '../methods/MidwifeMethod.js';
+import { MidwifeLogin, MidwifeLogout, getAllParents } from '../methods/MidwifeMethod.js';
 
 
 
 router.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -42,6 +42,6 @@ router.post('/logout', MidwifeLogout);
 
 router.use(checkAuth);
 
-
+router.get('parents', getAllParents);
 
 export default router;

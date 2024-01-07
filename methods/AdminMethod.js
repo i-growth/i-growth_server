@@ -81,33 +81,31 @@ export const CreateMidwife = async(req, res, next) => {
     // generate password
     const password = GeneratePassword;
 
-    // send email
-    try{
-        await transporter.sendMail({
-            from: "I-GROWTH <uc.chamod.public@gmail.com>",
-            to: `${email}`,
-            subject: "Your account have been created",
-            html: `
-                <h1>Your account have been created</h1>
-                <p>Username: ${nic}</p>
-                <p>Password: ${password}</p>
-                <p>Click <a href="http://localhost:3000/midwife/login">here</a> to login</p>
-            `
-        });   
-    }
-    catch(err){
-        return res.status(500).json({
-            message: "Can't send username and password to midwife"
-        })
-    }
-
     try{
         const [rows] = await pool.query('INSERT INTO midwife (name, service_start_date, nic, email, phone, service_id, created_admin_id, area_id, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, service_start_date, nic, email, phone, service_id, req.session.admin.admin_id.id, area_id, password]);
         
         if(rows.affectedRows > 0) {
-            return res.status(200).json({
-                message: 'Midwife created'
-            })
+            // send email
+            try{
+                await transporter.sendMail({
+                    from: "I-GROWTH <uc.chamod.public@gmail.com>",
+                    to: `${email}`,
+                    subject: "Your account have been created",
+                    html: `
+                        <h1>Your account have been created</h1>
+                        <p>Username: ${nic}</p>
+                        <p>Password: ${password}</p>
+                        <p>Click <a href="http://localhost:3000/midwife/login">here</a> to login</p>
+                    `
+                });
+
+                res.status(200).json({message: 'Midwife created'})  
+            }
+            catch(err){
+                return res.status(500).json({
+                    message: "Can't send username and password to midwife"
+                })
+            }
         }
         else {
             return res.status(500).json({
@@ -122,6 +120,41 @@ export const CreateMidwife = async(req, res, next) => {
     }
 }
 
+export const GetAllMidwifes = async(req, res, next) => {
+    try{
+        const [rows] = await pool.query('SELECT * FROM midwife');
+        const rests = rows.map((row) => {
+            const { password, ...rest } = row;
+            return rest;
+        })
+        return res.status(200).json(rests)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+}
+
+export const GetMidwifeByID = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('SELECT * FROM midwife WHERE midwife_id = ? LIMIT 1', [id]);
+        const rests = rows.map((row) => {
+            const { password, ...rest } = row;
+            return rest;
+        })
+        return res.status(200).json(rests)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+}
+
 export const CreateOfficer = async(req, res, next) => {
     const { officer_name, service_start_date, nic, email, phone, service_id, area_id } = req.body;
     
@@ -133,39 +166,133 @@ export const CreateOfficer = async(req, res, next) => {
 
     const password = GeneratePassword;
 
-    // send email
-    try{
-        await transporter.sendMail({
-            from: "I-GROWTH <uc.chamod.public@gmail.com>",
-            to: `${email}`,
-            subject: "Your account have been created",
-            html: `
-                <h1>Your account have been created</h1>
-                <p>Username: ${nic}</p>
-                <p>Password: ${password}</p>
-                <p>Click <a href="http://localhost:3000/officer/login">here</a> to login</p>
-            `
-        });   
-    }
-    catch(err){
-        return res.status(500).json({
-            message: "Can't send username and password to midwife"
-        })
-    }
-
     try{
         const [rows] = await pool.query('INSERT INTO medical_officer (officer_name, service_start_date, nic, email, phone, service_id, created_admin_id, area_id, password) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?)', [officer_name, service_start_date, nic, email, phone, service_id, req.session.admin.admin_id.id, area_id, password]);
         
         if(rows.affectedRows > 0) {
-            return res.status(200).json({
-                message: 'Officer created'
-            })
+            // send email
+            try{
+                await transporter.sendMail({
+                    from: "I-GROWTH <uc.chamod.public@gmail.com>",
+                    to: `${email}`,
+                    subject: "Your account have been created",
+                    html: `
+                        <h1>Your account have been created</h1>
+                        <p>Username: ${nic}</p>
+                        <p>Password: ${password}</p>
+                        <p>Click <a href="http://localhost:3000/officer/login">here</a> to login</p>
+                    `
+                }); 
+                
+                res.status(200).json({message: 'Officer created'})
+            }
+            catch(err){
+                return res.status(500).json({
+                    message: "Can't send username and password to midwife"
+                })
+            }
         }
         else {
             return res.status(500).json({
                 message: 'Officer creation failed'
             })
         }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+    
+}
+
+export const getAllOfficers = async(req, res, next) => {
+    try{
+        const [rows] = await pool.query('SELECT * FROM medical_officer');
+        const rests = rows.map((row) => {
+            const { password, ...rest } = row;
+            return rest;
+        })
+        return res.status(200).json(rests)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetOfficerByID = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('SELECT * FROM medical_officer WHERE officer_id = ? LIMIT 1', [id]);
+        const rests = rows.map((row) => {
+            const { password, ...rest } = row;
+            return rest;
+        })
+        return res.status(200).json(rests)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetOfficerByAreaID = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('SELECT * FROM medical_officer WHERE area_id = ?', [id]);
+        const rests = rows.map((row) => {
+            const { password, ...rest } = row;
+            return rest;
+        })
+        return res.status(200).json(rests)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+
+// not sure
+export const AddNews = async(req, res, next) => {
+    const { title, summary, description, author } = req.body;
+    
+    const image = req.file.filename;
+
+    if(!title || !summary || !description || !image || !author) {
+        return res.status(400).json({
+            message: 'All fields are required'
+        })
+    }
+    
+    try{
+        const [rows] = await pool.query('INSERT INTO news_feed (title, summary, description, image, author) VALUES (?, ?, ?, ?, ?)', [title, summary, description, image, `{"id":${req.session.admin.admin_id.id},"role":"admin"}`]);
+        if(rows.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'News added'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'News adding failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetNews = async(req, res, next) => {
+    try{
+        const [rows] = await pool.query('SELECT * FROM news_feed');
+        return res.status(200).json(rows)
     }
     catch(err) {
         return res.status(500).json({
