@@ -157,7 +157,7 @@ export const GetMidwifeByID = async(req, res, next) => {
 
 export const UpdateMidwife = async(req, res, next) => {
     const { id } = req.params;
-    const { name, phone, service_id, area_id } = req.body;
+    const { name, phone, service_id} = req.body;
 
     if(!id){
         return res.status(400).json({
@@ -165,14 +165,14 @@ export const UpdateMidwife = async(req, res, next) => {
         })
     }
 
-    if(!name || !phone || !service_id || !area_id) {
+    if(!name || !phone || !service_id) {
         return res.status(400).json({
             message: 'All fields are required'
         })
     }
 
     try{
-        const [rows] = await pool.query('UPDATE midwife SET name = ?, phone = ?, service_id = ?, area_id = ? WHERE midwife_id = ?', [name, phone, service_id, area_id, id]);
+        const [rows] = await pool.query('UPDATE midwife SET name = ?, phone = ?, service_id = ? WHERE midwife_id = ?', [name, phone, service_id, id]);
         
         if(rows.affectedRows > 0) {
             return res.status(200).json({
