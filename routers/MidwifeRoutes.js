@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import session from 'express-session';
-import { MidwifeLogin, MidwifeLogout, getAllParents } from '../methods/MidwifeMethod.js';
+import { AddChild, AddChildGrowthDetail, CreateParent, GetChildGrowthDetailByID, GetLastChildGrowthDetail, GetParentByID, MidwifeLogin, MidwifeLogout, getAllParents } from '../methods/MidwifeMethod.js';
 
 
 
@@ -43,6 +43,12 @@ router.post('/logout', MidwifeLogout);
 
 router.use(checkAuth);
 
-router.get('parents', getAllParents);
+router.post('/parent', CreateParent);
+router.get('/parents', getAllParents);
+router.get('/parent/:guardian_nic', GetParentByID);
+router.post('/child', AddChild);
+router.post('/child/growth_detail/:child_id', AddChildGrowthDetail);
+router.get('/child/growth_detail/:child_id', GetChildGrowthDetailByID);
+router.get('/child/last-growth_detail/:child_id', GetLastChildGrowthDetail);
 
 export default router;
