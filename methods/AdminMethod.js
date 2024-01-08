@@ -155,6 +155,44 @@ export const GetMidwifeByID = async(req, res, next) => {
 
 }
 
+export const UpdateMidwife = async(req, res, next) => {
+    const { id } = req.params;
+    const { name, phone, service_id, area_id } = req.body;
+
+    if(!id){
+        return res.status(400).json({
+            message: 'Midwife id is required in parms'
+        })
+    }
+
+    if(!name || !phone || !service_id || !area_id) {
+        return res.status(400).json({
+            message: 'All fields are required'
+        })
+    }
+
+    try{
+        const [rows] = await pool.query('UPDATE midwife SET name = ?, phone = ?, service_id = ?, area_id = ? WHERE midwife_id = ?', [name, phone, service_id, area_id, id]);
+        
+        if(rows.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'Midwife updated'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'Midwife updating failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+}
+
 export const CreateOfficer = async(req, res, next) => {
     const { officer_name, service_start_date, nic, email, phone, service_id, area_id } = req.body;
     
@@ -204,6 +242,44 @@ export const CreateOfficer = async(req, res, next) => {
         })
     }
     
+}
+
+export const UpdateOfficer = async(req, res, next) => {
+    const { id } = req.params;
+    const { officer_name, phone, service_id, area_id } = req.body;
+
+    if(!id){
+        return res.status(400).json({
+            message: 'Officer id is required in parms'
+        })
+    }
+
+    if(!officer_name || !phone || !service_id || !area_id) {
+        return res.status(400).json({
+            message: 'All fields are required'
+        })
+    }
+
+    try{
+        const [rows] = await pool.query('UPDATE medical_officer SET officer_name = ?, phone = ?, service_id = ?, area_id = ? WHERE officer_id = ?', [officer_name, phone, service_id, area_id, id]);
+        
+        if(rows.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'Officer updated'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'Officer updating failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
 }
 
 export const getAllOfficers = async(req, res, next) => {
