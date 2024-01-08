@@ -14,7 +14,7 @@ export const MidwifeLogin = async(req, res, next) => {
         
         try{
             if(rows.length > 0) {
-                req.session.midwife = {midwife_id: rows[0] };
+                req.session.midwife = {midwife_id: rows[0], area_id: rows[0].area_id };
                 req.session.save();
                 return res.status(200).json({
                     message: 'Login success',
@@ -154,7 +154,7 @@ export const AddChild = async(req, res, next) => {
     }
 
     try{
-        const [rows] = await pool.query('INSERT INTO child (child_name, child_gender, child_birthday, child_birth_certificate_no, child_born_weight, gardian_nic) VALUES (?, ?, ?, ?, ?, ?)', [child_name, child_gender, child_birthday, child_birth_certificate_no, child_born_weight, gardian_nic.toLowerCase()]);
+        const [rows] = await pool.query('INSERT INTO child (child_name, child_gender, child_birthday, child_birth_certificate_no, child_born_weight, gardian_nic, area_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [child_name, child_gender, child_birthday, child_birth_certificate_no, child_born_weight, gardian_nic.toLowerCase(), req.session.midwife.midwife_id.area_id]);
 
         if(rows.affectedRows > 0) {
             return res.status(200).json({
@@ -261,3 +261,118 @@ export const GetLastChildGrowthDetail = async(req, res, next) => {
         })
     }
 }
+
+const cal_sd = (month) => {
+    return {
+        plus_3SD: -(0.0174718 * Math.pow(month, 2))  + (0.91498 * month) + 5.11339,
+        plus_2SD: -(0.0157843 * Math.pow(month, 2))  + (0.803843 * month) + 4.53092,
+        plus_1SD: -(0.0142931 * Math.pow(month, 2))  + (0.719308 * month) + 3.90559,
+        median: -(0.013029 * Math.pow(month, 2))  + (0.645037 * month) + 3.46785,
+        minus_1SD: -(0.0117718 * Math.pow(month, 2))  + (0.577913 * month) + 2.96326,
+        minus_2SD: -(0.0107021 * Math.pow(month, 2))  + (0.523242 * month) + 2.55719,
+        minus_3SD: -(0.00420753 * Math.pow(month, 2))  + (0.353832 * month) + 2.0324,
+    }
+}
+
+export const GetSDMeasurements = async(req, res, next) => {
+
+    const {area_id} = req.session.midwife.midwife_id;
+    
+    const [rows] = await pool.query('SELECT child.*, TIMESTAMPDIFF(MONTH, child.child_birthday, CURDATE()) AS months_difference, growth_detail.weight FROM child LEFT JOIN growth_detail ON child.child_id = growth_detail.child_id AND growth_detail.month = ( SELECT MAX(month) FROM growth_detail WHERE child_id = child.child_id ) WHERE child.child_birthday >= DATE_SUB(CURDATE(), INTERVAL 60 MONTH) AND child.area_id = ?', [area_id]);
+    
+    // Create object for save 60 arrays
+    var sixtyMonths = {};
+    var sixtyMonths_copy = {};
+
+    // Create 60 arrays
+    for(var i = 2; i <= 60; i++){
+        sixtyMonths[i] = [];
+        sixtyMonths_copy[i] = [];
+    }
+
+    // Add data to arrays
+    rows.forEach(row => {
+        sixtyMonths[row.months_difference].push(row);
+    })
+
+    // Calculate SD
+    Object.keys(sixtyMonths).map((key) => {
+
+        if(sixtyMonths[key].length > 0){
+
+            sixtyMonths[key].forEach((row) => {
+
+                let caled_sd = cal_sd(row.months_difference);
+                
+                if(row.weight > caled_sd.plus_2SD){
+                    sixtyMonths_copy[key].push({
+                        // ...row,
+                        sd: 'over_weight'
+                    })
+                }
+                else if(row.weight > caled_sd.minus_1SD){
+                    sixtyMonths_copy[key].push({
+                        // ...row,
+                        sd: 'proper_weight'
+                    })
+                }
+                else if(row.weight > caled_sd.minus_2SD){
+                    sixtyMonths_copy[key].push({
+                        // ...row,
+                        sd: 'risk_of_under_weight'
+                    })
+                }
+                else if(row.weight > caled_sd.minus_3SD){
+                    sixtyMonths_copy[key].push({
+                        // ...row,
+                        sd: 'minimum_under_weight'
+                    })
+                }
+                else{
+                    sixtyMonths_copy[key].push({
+                        // ...row,
+                        sd: 'severe_under_weight'
+                    })
+                }
+            })
+        }
+    })
+
+    
+
+    Object.keys(sixtyMonths_copy).map((key) => {
+        
+        if(sixtyMonths_copy[key].length > 0){
+            sixtyMonths_copy[key].forEach((row) => {
+                let sd_count = {
+                    over_weight: 0,
+                    proper_weight: 0,
+                    risk_of_under_weight: 0,
+                    minimum_under_weight: 0,
+                    severe_under_weight: 0,
+                }        
+
+                if(row.sd == 'over_weight') sd_count.over_weight++;
+                else if(row.sd == 'proper_weight') sd_count.proper_weight++;
+                else if(row.sd == 'risk_of_under_weight') sd_count.risk_of_under_weight++;
+                else if(row.sd == 'minimum_under_weight') sd_count.minimum_under_weight++;
+                else if(row.sd == 'severe_under_weight') sd_count.severe_under_weight++;
+
+                sixtyMonths_copy[key] = sd_count
+            });
+
+        }
+        else{
+            sixtyMonths_copy[key] = {
+                over_weight: 0,
+                proper_weight: 0,
+                risk_of_under_weight: 0,
+                minimum_under_weight: 0,
+                severe_under_weight: 0,
+            }
+        }
+    })
+
+    res.send(sixtyMonths_copy)
+}
+
