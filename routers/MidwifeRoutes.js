@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import session from 'express-session';
-import { AddChild, AddChildGrowthDetail, CreateParent, GetChildGrowthDetailByID, GetLastChildGrowthDetail, GetParentByID, GetSDMeasurements, MidwifeLogin, MidwifeLogout, getAllParents } from '../methods/MidwifeMethod.js';
+import { AddChild, AddChildGrowthDetail, CreateParent, GetChildGrowthDetailByID, GetLastChildGrowthDetail, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
 
 
 
@@ -46,12 +46,16 @@ router.use(checkAuth);
 router.post('/parent', CreateParent);
 router.get('/parents', getAllParents);
 router.get('/parent/:guardian_nic', GetParentByID);
+
+
 router.post('/child', AddChild);
 router.post('/child/growth_detail/:child_id', AddChildGrowthDetail);
 router.get('/child/growth_detail/:child_id', GetChildGrowthDetailByID);
 router.get('/child/last-growth_detail/:child_id', GetLastChildGrowthDetail);
-
 // FOR TABLE
-router.get('/child/sd_measurements', GetSDMeasurements)
+router.get('/child/sd_measurements', GetSDMeasurements);
+
+router.get('/child/vaccine/:child_id', GetVaccineTableForChild);
+router.post('/child/vaccine/:child_id/:vaccine_id', VaccineGetByChild);
 
 export default router;

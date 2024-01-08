@@ -376,3 +376,98 @@ export const GetSDMeasurements = async(req, res, next) => {
     res.send(sixtyMonths_copy)
 }
 
+export const GetVaccineTableForChild = async(req, res, next) => {
+    const { child_id } = req.params;
+
+    var VACCINE_MAP = []
+
+    if(!child_id){
+        return res.status(400).json({
+            message: 'Please add params child_id',
+        })
+    }
+
+    try{
+        let [all_vaccine] = await pool.query(`select * from vaccine_timetable`);
+        
+        if(all_vaccine.length < 1) return res.status(404).json({message: 'Vaccine not found'})
+
+        const [children] = await pool.query(`select *, TIMESTAMPDIFF(MONTH, child_birthday, CURDATE()) AS months_difference from child where child_id = ?`, [child_id]);
+        
+        if(children.length < 1) return res.status(404).json({message: 'Child not found'})
+
+        const child = children[0];
+
+        let[take_vaccine] = await pool.query(`select * from taked_vaccine where child_id = ?`, [child_id]);
+
+        // all_vaccine
+        // child
+        // take_vaccine
+
+        all_vaccine.forEach(vaccine => {
+
+            let return_data = {
+                vaccine_id: vaccine.vaccine_id,
+                vaccine_name: vaccine.vaccine_name,
+                vaccine_month: vaccine.vaccine_month,
+            }
+
+            // Check whether the eligible for vaccine
+            const eligible = vaccine.vaccine_month <= child.months_difference;
+            console.log(vaccine);
+            // Check whether the vaccine has been taken
+            const taken = take_vaccine.find(take => take.vaccine_id == vaccine.vaccine_id);
+
+            if(taken) {
+                return_data = {...return_data, status: "taken"}
+            }
+            else if(eligible) {
+                return_data = {...return_data, status: "eligible"}
+            }
+            else {
+                return_data = {...return_data, status: "not_eligible"}
+            }
+
+            VACCINE_MAP.push(return_data);
+            
+        })
+
+        return res.status(200).json(VACCINE_MAP)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const VaccineGetByChild = async(req, res, next) => {
+    const { child_id, vaccine_id } = req.params;
+
+    if(!child_id || !vaccine_id){
+        return res.status(400).json({
+            message: 'Please add params child_id and vaccine_id',
+        })
+    }
+
+    try{
+        const [row] = await pool.query('INSERT INTO taked_vaccine(child_id, vaccine_id) VALUES (?, ?)', [child_id, vaccine_id]);
+
+        if(row.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'Vaccine use added'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'Vaccine usgae adding failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
