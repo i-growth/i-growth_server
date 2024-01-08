@@ -122,7 +122,7 @@ export const CreateMidwife = async(req, res, next) => {
 
 export const GetAllMidwifes = async(req, res, next) => {
     try{
-        const [rows] = await pool.query('SELECT * FROM midwife');
+        const [rows] = await pool.query('SELECT midwife.*, area.area_name FROM midwife inner join area on midwife.area_id = area.area_id');
         const rests = rows.map((row) => {
             const { password, ...rest } = row;
             return rest;
