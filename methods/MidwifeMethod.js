@@ -453,6 +453,18 @@ export const GetSDMeasurements = async(req, res, next) => {
     res.send(sixtyMonths_copy)
 }
 
+export const GetAllVaccine = async(req, res, next) => {
+    try{
+        const [rows] = await pool.query('SELECT * FROM vaccine');
+        return res.status(200).json(rows)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
 export const GetVaccineTableForChild = async(req, res, next) => {
     const { child_id } = req.params;
 
