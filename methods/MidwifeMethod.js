@@ -326,9 +326,31 @@ export const GetLastChildGrowthDetail = async(req, res, next) => {
     }
 
     try{
-        const [rows] = await pool.query('SELECT * FROM growth_detail WHERE child_id = ? ORDER BY month DESC LIMIT 1', [child_id]);
+        const [rows] = await pool.query('SELECT growth_detail.*, child.child_name, child.area_id FROM growth_detail join child on child.child_id = growth_detail.child_id WHERE growth_detail.child_id = ? ORDER BY month DESC LIMIT 1', [child_id]);
 
-        if(rows.length < 1) return res.status(404).json({message: 'Child growth detail not found'})
+        if(rows.length < 1) {
+
+            try{
+                const [child] = await pool.query('SELECT * FROM child WHERE child_id = ?', [child_id]);
+                if(child.length < 1) return res.status(404).json({message: 'Child not found'})
+                return res.status(200).json({
+                    message: 'Child growth detail not found',
+                    child: child[0]
+                })
+            }
+            catch(err) {
+                return res.status(500).json({
+                    message: err.message
+                })
+            }
+            // return res.status(404).json({message: 'Child growth detail not found'})
+        }
+
+        if(req.session.midwife.midwife_id.area_id != rows[0].area_id){
+            return res.status(200).json({
+                message: 'Not privileges'
+            })
+        }
 
         return res.status(200).json(rows[0])
     }
