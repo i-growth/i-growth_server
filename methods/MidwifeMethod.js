@@ -174,6 +174,83 @@ export const AddChild = async(req, res, next) => {
     }
 }
 
+export const GetChildByID = async(req, res, next) => {
+    const { id } = req.params;
+
+    if(!id){
+        return res.status(400).json({
+            message: 'Please add params child_id',
+        })
+    }
+
+    try{
+        const [rows] = await pool.query('SELECT child.*, parent.guardian_nic, parent.mother_name, parent.father_name, parent.phone, parent.email, parent.address, parent.area_id, area.area_name, parent.guardian_name, parent.created_midwife FROM child join parent on child.gardian_nic = parent.guardian_nic join area on child.area_id = area.area_id where child.child_id = ?', [id]);
+
+        if(rows.length < 1) return res.status(404).json({message: 'Child not found'})
+
+        return res.status(200).json(rows[0])
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetAllChild = async(req, res, next) => {
+    
+    try{
+        const [rows] = await pool.query('SELECT child.*, parent.guardian_nic, parent.mother_name, parent.father_name, parent.phone, parent.email, parent.address, parent.area_id, area.area_name, parent.guardian_name, parent.created_midwife FROM child join parent on child.gardian_nic = parent.guardian_nic join area on child.area_id = area.area_id inner join midwife on midwife.area_id = child.area_id where child.area_id = 7;', [req.session.midwife.midwife_id.area_id]);
+
+        if(rows.length < 1) return res.status(404).json({message: 'Child not found'})
+
+        return res.status(200).json(rows)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const UpdateChild = async(req, res, next) => {
+    const {child_id} = req.params;
+    const { child_name, child_gender, child_birthday, child_birth_certificate_no, child_born_weight } = req.body;
+
+    if(!child_id){
+        return res.status(400).json({
+            message: 'Please add params child_id',
+        })
+    }
+
+    if(!child_name || !child_gender || !child_birthday || !child_born_weight){
+        return res.status(400).json({
+            message: 'Please fill all fields',
+            fields: ["child_name", "child_gender", "child_birthday", "child_born_weight"]
+        })
+    }
+
+    try{
+        const [row] = await pool.query('UPDATE child SET child_name = ?, child_gender = ?, child_birthday = ?, child_born_weight = ?', [child_name, child_gender, child_birthday, child_born_weight]);
+
+        if(row.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'Child updated'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'Child updating failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
 export const AddChildGrowthDetail = async(req, res, next) => {
     const { child_id } = req.params;
 
@@ -388,7 +465,7 @@ export const GetVaccineTableForChild = async(req, res, next) => {
     }
 
     try{
-        let [all_vaccine] = await pool.query(`select * from vaccine_timetable`);
+        let [all_vaccine] = await pool.query(`select vaccine_timetable.*, vaccine.* from vaccine_timetable join vaccine on vaccine.vaccine_id = vaccine_timetable.vaccine_id`);
         
         if(all_vaccine.length < 1) return res.status(404).json({message: 'Vaccine not found'})
 
