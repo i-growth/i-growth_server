@@ -701,3 +701,61 @@ export const GetGrowthDetailsChart = async(req, res, next) => {
         })
     }
 }
+
+export const AddNews = async(req, res, next) => {
+    const { title, summary, description } = req.body;
+
+    const author = `{"id":${req.session.midwife.midwife_id.midwife_id},"role":"midwife"}`
+    
+    const image = req.file.filename;
+
+    if(!title || !summary || !description || !image || !author) {
+        return res.status(400).json({
+            message: 'All fields are required'
+        })
+    }
+    
+    try{
+        const [rows] = await pool.query('INSERT INTO news_feed (title, summary, description, image, author) VALUES (?, ?, ?, ?, ?)', [title, summary, description, image, author]);
+        if(rows.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'News added'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'News adding failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetNews = async(req, res, next) => {
+    try{
+        const [rows] = await pool.query('SELECT * FROM news_feed');
+        return res.status(200).json(rows)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetNewsByID = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('SELECT * FROM news_feed WHERE news_id = ? LIMIT 1', [id]);
+        return res.status(200).json(rows[0])
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}

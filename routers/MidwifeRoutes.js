@@ -1,7 +1,8 @@
 import express from 'express';
 const router = express.Router();
 import session from 'express-session';
-import { AddChild, AddChildGrowthDetail, CheckMidwifeAuth, CreateParent, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, UpdateChild, UpdateParent, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
+import multer from 'multer';
+import { AddChild, AddChildGrowthDetail, AddNews, CheckMidwifeAuth, CreateParent, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetNews, GetNewsByID, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, UpdateChild, UpdateParent, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
 
 
 
@@ -36,6 +37,18 @@ const checkAuth = (req, res, next) => {
     }
 }
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/")
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname)
+  },
+})
+
+const uploadStorage = multer({ storage: storage })
+router.options('*', (req, res) => res.sendStatus(200));
+
 
 router.options('*', (req, res) => res.sendStatus(200));
 router.post('/login', MidwifeLogin);
@@ -67,5 +80,10 @@ router.get('/child/growth-detail-chart/:child_id', GetGrowthDetailsChart);
 router.get('/child', GetAllChild);
 router.get('/child/:id', GetChildByID);
 router.put('/child/:child_id', UpdateChild);
+
+router.post('/add-news', uploadStorage.single('file'), AddNews);
+router.get('/news', GetNews);
+router.get('/news/:id', GetNewsByID);
+
 
 export default router;
