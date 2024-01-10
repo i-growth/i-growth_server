@@ -90,13 +90,8 @@ export const CreateMidwife = async(req, res, next) => {
                 await transporter.sendMail({
                     from: "I-GROWTH <uc.chamod.public@gmail.com>",
                     to: `${email}`,
-                    subject: "Your account have been created",
-                    html: `
-                        <h1>Your account have been created</h1>
-                        <p>Username: ${nic}</p>
-                        <p>Password: ${password}</p>
-                        <p>Click <a href="http://localhost:3000/midwife/login">here</a> to login</p>
-                    `
+                    subject: "Your Account Has Been Created",
+                    html: `<div style="width: 100%; height: auto; box-sizing: border-box;"><div style="max-width: 500px; width: 100%; background-color: rgb(231, 231, 231); margin: 0 auto; padding: 20px 10px; box-sizing: border-box;"><h1 style="margin: 0; text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 22px; color: rgb(61, 89, 243); ">I-GROWTH</h1><div><p style="font-family: Arial, Helvetica, sans-serif; font-size: 15px;">Your account has been created. You can access your account using this link <a href="http://localhost:3000/auth">http://localhost:3000/auth</a></p><div style="width: fit-content; background-color: rgb(63, 63, 63); color: #ffffff; padding: 10px;"><code>USERNAME : ${nic}</code><br><code>PASSWORD : ${password}</code></div></div></div></div>`
                 });
 
                 res.status(200).json({message: 'Midwife created'})  
@@ -213,20 +208,15 @@ export const CreateOfficer = async(req, res, next) => {
                 await transporter.sendMail({
                     from: "I-GROWTH <uc.chamod.public@gmail.com>",
                     to: `${email}`,
-                    subject: "Your account have been created",
-                    html: `
-                        <h1>Your account have been created</h1>
-                        <p>Username: ${nic}</p>
-                        <p>Password: ${password}</p>
-                        <p>Click <a href="http://localhost:3000/officer/login">here</a> to login</p>
-                    `
+                    subject: "Your Account Has Been Created",
+                    html: `<div style="width: 100%; height: auto; box-sizing: border-box;"><div style="max-width: 500px; width: 100%; background-color: rgb(231, 231, 231); margin: 0 auto; padding: 20px 10px; box-sizing: border-box;"><h1 style="margin: 0; text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 22px; color: rgb(61, 89, 243); ">I-GROWTH</h1><div><p style="font-family: Arial, Helvetica, sans-serif; font-size: 15px;">Your account has been created. You can access your account using this link <a href="http://localhost:3000/auth">http://localhost:3000/auth</a></p><div style="width: fit-content; background-color: rgb(63, 63, 63); color: #ffffff; padding: 10px;"><code>USERNAME : ${nic}</code><br><code>PASSWORD : ${password}</code></div></div></div></div>`
                 }); 
                 
                 res.status(200).json({message: 'Officer created'})
             }
             catch(err){
                 return res.status(500).json({
-                    message: "Can't send username and password to midwife"
+                    message: "Can't send username and password to officer"
                 })
             }
         }
