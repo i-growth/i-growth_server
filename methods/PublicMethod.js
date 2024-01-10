@@ -1,4 +1,5 @@
 import pool from "../resource/db_connection.js";
+import path from 'path';
 
 export const GetAllAreas = async (req, res, next) => {
     try {
@@ -36,4 +37,17 @@ export const GetAreaByID = async (req, res, next) => {
             message: err.message
         })
     }
+}
+
+export const GetImageByID = async (req, res, next) => {
+    const {id} = req.params;
+    if(!id) {
+        return res.status(400).json({
+            message: 'Please fill all fields'
+        })
+    }
+
+    const current_directory = path.resolve();
+    const image_path = path.join(current_directory, 'uploads', id);
+    res.sendFile(image_path);
 }

@@ -368,3 +368,16 @@ export const GetNews = async(req, res, next) => {
         })
     }
 }
+
+export const GetNewsByID = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('SELECT * FROM news_feed WHERE news_id = ? LIMIT 1', [id]);
+        return res.status(200).json(rows[0])
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
