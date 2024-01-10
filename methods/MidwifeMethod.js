@@ -141,6 +141,58 @@ export const getAllParents = async(req, res, next) => {
     }
 }
 
+export const UpdateParent = async(req, res, next) => {
+    const { guardian_nic } = req.params;
+    const { mother_name, father_name, phone, address, guardian_name } = req.body;
+
+    if(!guardian_nic || !mother_name || !father_name || !phone || !address || !guardian_name) {
+        return res.status(400).json({
+            message: 'Please fill all fields',
+            fields: ['guardian_nic', 'mother_name', 'father_name', 'phone', 'address', 'guardian_name']
+        })
+    }
+
+    // get parent by gardian_nic
+    try{
+        const [rows] = await pool.query('SELECT * FROM parent WHERE guardian_nic = ?', [guardian_nic.toLowerCase()]);
+
+        if(rows.length < 1) return res.status(404).json({message: 'Parent not found'})
+
+        if(rows[0].area_id != req.session.midwife.midwife_id.area_id){
+            return res.status(401).json({
+                message: 'Not privileges'
+            })
+        }
+    
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+    
+    try{
+        const [row] = await pool.query('UPDATE parent SET mother_name = ?, father_name = ?, phone = ?, address = ?, guardian_name = ? WHERE guardian_nic = ?', [mother_name, father_name, phone, address, guardian_name, guardian_nic.toLowerCase()]);
+
+        if(row.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'Parent updated'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'Parent updating failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
 export const GetParentByID = async(req, res, next) => {
     const {guardian_nic} = req.params;
     try{
