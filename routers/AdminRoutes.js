@@ -36,7 +36,6 @@ const storage = multer.diskStorage({
 
 const uploadStorage = multer({ storage: storage })
 
-
 const checkAuth = (req, res, next) => {
     if(req.session.admin) {
         next();
