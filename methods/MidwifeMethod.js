@@ -127,7 +127,7 @@ export const CreateParent = async(req, res, next) => {
 
 export const getAllParents = async(req, res, next) => {
     try{
-        const [rows] = await pool.query('SELECT * FROM parent');
+        const [rows] = await pool.query('SELECT parent.*, area.area_name FROM parent inner join area on parent.area_id = area.area_id');
         const parents = rows.map((row) => {
             const { password, ...parent } = row;
             return parent;

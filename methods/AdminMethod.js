@@ -325,7 +325,9 @@ export const GetOfficerByAreaID = async(req, res, next) => {
 
 // not sure
 export const AddNews = async(req, res, next) => {
-    const { title, summary, description, author } = req.body;
+    const { title, summary, description } = req.body;
+
+    const author = `{"id":${req.session.admin.admin_id.id},"role":"admin"}`
     
     const image = req.file.filename;
 
@@ -336,7 +338,7 @@ export const AddNews = async(req, res, next) => {
     }
     
     try{
-        const [rows] = await pool.query('INSERT INTO news_feed (title, summary, description, image, author) VALUES (?, ?, ?, ?, ?)', [title, summary, description, image, `{"id":${req.session.admin.admin_id.id},"role":"admin"}`]);
+        const [rows] = await pool.query('INSERT INTO news_feed (title, summary, description, image, author) VALUES (?, ?, ?, ?, ?)', [title, summary, description, image, author]);
         if(rows.affectedRows > 0) {
             return res.status(200).json({
                 message: 'News added'
