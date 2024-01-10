@@ -390,102 +390,112 @@ export const GetSDMeasurements = async(req, res, next) => {
 
     const {area_id} = req.session.midwife.midwife_id;
     
-    const [rows] = await pool.query('SELECT child.*, TIMESTAMPDIFF(MONTH, child.child_birthday, CURDATE()) AS months_difference, growth_detail.weight FROM child LEFT JOIN growth_detail ON child.child_id = growth_detail.child_id AND growth_detail.month = ( SELECT MAX(month) FROM growth_detail WHERE child_id = child.child_id ) WHERE child.child_birthday >= DATE_SUB(CURDATE(), INTERVAL 60 MONTH) AND child.area_id = ?', [area_id]);
+    try{
+        const [rows] = await pool.query('SELECT child.*, TIMESTAMPDIFF(MONTH, child.child_birthday, CURDATE()) AS months_difference, growth_detail.weight FROM child LEFT JOIN growth_detail ON child.child_id = growth_detail.child_id AND growth_detail.month = ( SELECT MAX(month) FROM growth_detail WHERE child_id = child.child_id ) WHERE child.child_birthday >= DATE_SUB(CURDATE(), INTERVAL 60 MONTH) AND child.area_id = ?', [area_id]);
     
-    // Create object for save 60 arrays
-    var sixtyMonths = {};
-    var sixtyMonths_copy = {};
+        // Create object for save 60 arrays
+        var sixtyMonths = {};
+        var sixtyMonths_copy = {};
 
-    // Create 60 arrays
-    for(var i = 2; i <= 60; i++){
-        sixtyMonths[i] = [];
-        sixtyMonths_copy[i] = [];
-    }
-
-    // Add data to arrays
-    rows.forEach(row => {
-        sixtyMonths[row.months_difference].push(row);
-    })
-
-    // Calculate SD
-    Object.keys(sixtyMonths).map((key) => {
-
-        if(sixtyMonths[key].length > 0){
-
-            sixtyMonths[key].forEach((row) => {
-
-                let caled_sd = cal_sd(row.months_difference);
-                
-                if(row.weight > caled_sd.plus_2SD){
-                    sixtyMonths_copy[key].push({
-                        // ...row,
-                        sd: 'over_weight'
-                    })
-                }
-                else if(row.weight > caled_sd.minus_1SD){
-                    sixtyMonths_copy[key].push({
-                        // ...row,
-                        sd: 'proper_weight'
-                    })
-                }
-                else if(row.weight > caled_sd.minus_2SD){
-                    sixtyMonths_copy[key].push({
-                        // ...row,
-                        sd: 'risk_of_under_weight'
-                    })
-                }
-                else if(row.weight > caled_sd.minus_3SD){
-                    sixtyMonths_copy[key].push({
-                        // ...row,
-                        sd: 'minimum_under_weight'
-                    })
-                }
-                else{
-                    sixtyMonths_copy[key].push({
-                        // ...row,
-                        sd: 'severe_under_weight'
-                    })
-                }
-            })
+        // Create 60 arrays
+        for(var i = 2; i <= 60; i++){
+            sixtyMonths[i] = [];
+            sixtyMonths_copy[i] = [];
         }
-    })
 
-    
+        console.log(rows);
+        // Add data to arrays
+        rows.forEach(row => {
+            if(row.months_difference >= 2 && row.months_difference <= 60) sixtyMonths[row.months_difference].push(row);
+            // console.log(row.months_difference);
+        })
 
-    Object.keys(sixtyMonths_copy).map((key) => {
+        // Calculate SD
+        Object.keys(sixtyMonths).map((key) => {
+
+            if(sixtyMonths[key].length > 0){
+
+                sixtyMonths[key].forEach((row) => {
+
+                    let caled_sd = cal_sd(row.months_difference);
+                    
+                    if(row.weight > caled_sd.plus_2SD){
+                        sixtyMonths_copy[key].push({
+                            // ...row,
+                            sd: 'over_weight'
+                        })
+                    }
+                    else if(row.weight > caled_sd.minus_1SD){
+                        sixtyMonths_copy[key].push({
+                            // ...row,
+                            sd: 'proper_weight'
+                        })
+                    }
+                    else if(row.weight > caled_sd.minus_2SD){
+                        sixtyMonths_copy[key].push({
+                            // ...row,
+                            sd: 'risk_of_under_weight'
+                        })
+                    }
+                    else if(row.weight > caled_sd.minus_3SD){
+                        sixtyMonths_copy[key].push({
+                            // ...row,
+                            sd: 'minimum_under_weight'
+                        })
+                    }
+                    else{
+                        sixtyMonths_copy[key].push({
+                            // ...row,
+                            sd: 'severe_under_weight'
+                        })
+                    }
+                })
+            }
+        })
+
         
-        if(sixtyMonths_copy[key].length > 0){
-            sixtyMonths_copy[key].forEach((row) => {
-                let sd_count = {
+
+        Object.keys(sixtyMonths_copy).map((key) => {
+            
+            if(sixtyMonths_copy[key].length > 0){
+                sixtyMonths_copy[key].forEach((row) => {
+                    let sd_count = {
+                        over_weight: 0,
+                        proper_weight: 0,
+                        risk_of_under_weight: 0,
+                        minimum_under_weight: 0,
+                        severe_under_weight: 0,
+                    }        
+
+                    if(row.sd == 'over_weight') sd_count.over_weight++;
+                    else if(row.sd == 'proper_weight') sd_count.proper_weight++;
+                    else if(row.sd == 'risk_of_under_weight') sd_count.risk_of_under_weight++;
+                    else if(row.sd == 'minimum_under_weight') sd_count.minimum_under_weight++;
+                    else if(row.sd == 'severe_under_weight') sd_count.severe_under_weight++;
+
+                    sixtyMonths_copy[key] = sd_count
+                });
+
+            }
+            else{
+                sixtyMonths_copy[key] = {
                     over_weight: 0,
                     proper_weight: 0,
                     risk_of_under_weight: 0,
                     minimum_under_weight: 0,
                     severe_under_weight: 0,
-                }        
-
-                if(row.sd == 'over_weight') sd_count.over_weight++;
-                else if(row.sd == 'proper_weight') sd_count.proper_weight++;
-                else if(row.sd == 'risk_of_under_weight') sd_count.risk_of_under_weight++;
-                else if(row.sd == 'minimum_under_weight') sd_count.minimum_under_weight++;
-                else if(row.sd == 'severe_under_weight') sd_count.severe_under_weight++;
-
-                sixtyMonths_copy[key] = sd_count
-            });
-
-        }
-        else{
-            sixtyMonths_copy[key] = {
-                over_weight: 0,
-                proper_weight: 0,
-                risk_of_under_weight: 0,
-                minimum_under_weight: 0,
-                severe_under_weight: 0,
+                }
             }
-        }
-    })
+        })
 
-    res.send(sixtyMonths_copy)
+        res.send(sixtyMonths_copy)
+    }
+    catch(err) {
+        console.log(err);
+        return res.status(500).json({
+            message: err.message
+        })
+    }
 }
 
 export const GetAllVaccine = async(req, res, next) => {
