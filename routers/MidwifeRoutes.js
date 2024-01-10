@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import session from 'express-session';
-import { AddChild, AddChildGrowthDetail, CreateParent, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, UpdateChild, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
+import { AddChild, AddChildGrowthDetail, CheckMidwifeAuth, CreateParent, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, UpdateChild, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
 
 
 
@@ -40,6 +40,7 @@ const checkAuth = (req, res, next) => {
 router.options('*', (req, res) => res.sendStatus(200));
 router.post('/login', MidwifeLogin);
 router.post('/logout', MidwifeLogout);
+router.get('/check-auth', CheckMidwifeAuth);
 
 router.use(checkAuth);
 

@@ -54,6 +54,19 @@ export const MidwifeLogout = async(req, res, next) => {
     }
 }
 
+export const CheckMidwifeAuth = async(req, res, next) => {
+    if(req.session.midwife) {
+        return res.status(200).json({
+            message: 'Authorized'
+        })
+    }
+    else {
+        return res.status(401).json({
+            message: 'Unauthorized'
+        })
+    }
+}
+
 export const CreateParent = async(req, res, next) => {
     const { guardian_nic, mother_name, father_name, phone, email, address, area_id, guardian_name } = req.body;
 
