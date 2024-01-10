@@ -284,7 +284,7 @@ export const UpdateOfficer = async(req, res, next) => {
 
 export const getAllOfficers = async(req, res, next) => {
     try{
-        const [rows] = await pool.query('SELECT * FROM medical_officer');
+        const [rows] = await pool.query('SELECT *, area.area_name FROM medical_officer inner join area on medical_officer.area_id = area.area_id');
         const rests = rows.map((row) => {
             const { password, ...rest } = row;
             return rest;

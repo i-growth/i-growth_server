@@ -489,8 +489,19 @@ export const GetSDMeasurements = async(req, res, next) => {
 }
 
 export const GetAllVaccine = async(req, res, next) => {
+    const midwife_area_id = req.session.midwife.midwife_id.area_id;
+
     try{
         const [rows] = await pool.query('SELECT * FROM vaccine');
+
+        // const vaccines_populate_with_more_data = rows.map( async(row) => {
+        //     const {vaccine_id, vaccine_name, note} = row;
+
+        //     // Get how many children are eligible for this vaccine
+        //     const [children] = await pool.query(`select COUNT(child_id), TIMESTAMPDIFF(MONTH, child_birthday, CURDATE()) AS months_difference from child where area_id = ?`, [midwife_area_id]);
+        //     console.log(children);
+        // })
+
         return res.status(200).json(rows)
     }
     catch(err) {
