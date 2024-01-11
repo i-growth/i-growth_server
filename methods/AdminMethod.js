@@ -328,7 +328,13 @@ export const AddNews = async(req, res, next) => {
     const { title, summary, description } = req.body;
 
     const author = `{"id":${req.session.admin.admin_id.id},"role":"admin"}`
-    
+
+    if(req.file == undefined) {
+        return res.status(400).json({
+            message: 'Image is required'
+        })
+    }
+
     const image = req.file.filename;
 
     if(!title || !summary || !description || !image || !author) {
