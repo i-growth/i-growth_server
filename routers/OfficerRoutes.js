@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import session from 'express-session';
-import { AddNews, DeleteNews, GetNews, GetNewsByID, GetOfficerProfile, Logout, OfficerLogin } from '../methods/OfficerMethod.js';
+import { AddNews, DeleteNews, GetNews, GetNewsByID, GetOfficerProfile, GetSummary, Logout, OfficerLogin } from '../methods/OfficerMethod.js';
 import multer from 'multer';
 
 
@@ -55,15 +55,13 @@ router.use(checkAuth);
 
 router.get('/check-auth', (req, res) => res.status(200).json({message: 'Authorized'}));
 
-router.get('/profile', GetOfficerProfile)
-
 router.post('/add-news', uploadStorage.single('file'), AddNews);
 router.get('/news', GetNews);
 router.get('/news/:id', GetNewsByID);
 router.delete('/news/:id', DeleteNews);
 
 // View Profile
-// Edit Profile
-// Generate Report
+router.get('/report-summary', GetSummary)
+
 
 export default router;

@@ -141,3 +141,85 @@ export const GetOfficerProfile = async(req, res, next) => {
         })
     }
 }
+
+const cal_sd = (month) => {
+    return {
+        plus_3SD: -(0.0174718 * Math.pow(month, 2))  + (0.91498 * month) + 5.11339,
+        plus_2SD: -(0.0157843 * Math.pow(month, 2))  + (0.803843 * month) + 4.53092,
+        plus_1SD: -(0.0142931 * Math.pow(month, 2))  + (0.719308 * month) + 3.90559,
+        median: -(0.013029 * Math.pow(month, 2))  + (0.645037 * month) + 3.46785,
+        minus_1SD: -(0.0117718 * Math.pow(month, 2))  + (0.577913 * month) + 2.96326,
+        minus_2SD: -(0.0107021 * Math.pow(month, 2))  + (0.523242 * month) + 2.55719,
+        minus_3SD: -(0.00420753 * Math.pow(month, 2))  + (0.353832 * month) + 2.0324,
+    }
+}
+
+export const GetSummary = async(req, res, next) => {
+    const officer_id = req.session.officer.officer_id.officer_id;
+    const {area_id} = req.session.officer.officer_id;
+
+    let DATA = {
+        child_in_60_month: undefined,
+        wight_group: {
+            over_weight: 0,
+            proper_weight: 0,
+            risk_for_under_weight: 0,
+            medium_under_weight: 0,
+            severe_under_weight: 0
+        },
+    }
+
+    try{
+        // get all child 60 weeks
+        const [rows] = await pool.query('SELECT COUNT(child_id) as total FROM child WHERE TIMESTAMPDIFF(MONTH, child_birthday, CURDATE()) <= 60 AND area_id = ?', [area_id]);
+        DATA.child_in_60_month = rows[0].total;
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+    // WEIGHT GROUP
+    let child_in_one_month = [];
+    try{
+        const [rows] = await pool.query("SELECT gd.* FROM growth_detail gd INNER JOIN ( SELECT child_id, MAX(updated_date) AS latest_date FROM growth_detail GROUP BY child_id ) latest_growth ON gd.child_id = latest_growth.child_id AND gd.updated_date = latest_growth.latest_date INNER JOIN child c ON gd.child_id = c.child_id WHERE gd.updated_date >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY) AND c.area_id = ?", [area_id]);
+        child_in_one_month = rows;
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+    // 
+    child_in_one_month.map(child => {
+
+        const SD_values = cal_sd(child.month)
+
+        console.log({wight: child.weight, SD_values});
+
+        if(child.weight < SD_values.minus_3SD) {
+            DATA.wight_group.severe_under_weight += 1;
+        }
+        else if(child.weight < SD_values.minus_2SD) {
+            DATA.wight_group.medium_under_weight += 1;
+        }
+        else if(child.weight < SD_values.minus_1SD) {
+            DATA.wight_group.risk_for_under_weight += 1;
+        }
+        else if(child.weight < SD_values.plus_2SD) {
+            DATA.wight_group.proper_weight += 1;
+        }
+        else {
+            DATA.wight_group.over_weight += 1;
+        }
+        
+    })
+
+
+
+
+    res.send(DATA);
+    
+}

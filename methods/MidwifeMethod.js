@@ -265,7 +265,7 @@ export const GetChildByID = async(req, res, next) => {
 export const GetAllChild = async(req, res, next) => {
     
     try{
-        const [rows] = await pool.query('SELECT child.*, parent.guardian_nic, parent.mother_name, parent.father_name, parent.phone, parent.email, parent.address, parent.area_id, area.area_name, parent.guardian_name, parent.created_midwife FROM child join parent on child.gardian_nic = parent.guardian_nic join area on child.area_id = area.area_id inner join midwife on midwife.area_id = child.area_id where child.area_id = 7;', [req.session.midwife.midwife_id.area_id]);
+        const [rows] = await pool.query('SELECT child.*, parent.guardian_nic, parent.mother_name, parent.father_name, parent.phone, parent.email, parent.address, parent.area_id, area.area_name, parent.guardian_name, parent.created_midwife FROM child inner join parent on child.gardian_nic = parent.guardian_nic inner join area on child.area_id = area.area_id where child.area_id = ?', [req.session.midwife.midwife_id.area_id]);
 
         if(rows.length < 1) return res.status(404).json({message: 'Child not found'})
 
