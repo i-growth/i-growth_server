@@ -94,7 +94,7 @@ export const CrateAdmin = async(req, res, next) => {
 
 export const GetAllAdmin = async(req, res, next) => {
     try{
-        const [rows] = await pool.query('SELECT * FROM admin where super = 0');
+        const [rows] = await pool.query('SELECT admin.*, area.area_id, area_name FROM admin inner join area on admin.area_id = area.area_id where super = 0');
         return res.status(200).json(rows)
     }
     catch(err) {

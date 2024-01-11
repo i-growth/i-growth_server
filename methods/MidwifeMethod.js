@@ -554,7 +554,7 @@ export const GetAllVaccine = async(req, res, next) => {
     const midwife_area_id = req.session.midwife.midwife_id.area_id;
 
     try{
-        const [rows] = await pool.query('SELECT * FROM vaccine');
+        const [rows] = await pool.query('SELECT vaccine_timetable.vaccine_timetable_id as id, vaccine_timetable.vaccine_month, vaccine_timetable.note, vaccine.vaccine_name FROM vaccine_timetable inner join vaccine on vaccine_timetable.vaccine_id = vaccine.vaccine_id');
 
         // const vaccines_populate_with_more_data = rows.map( async(row) => {
         //     const {vaccine_id, vaccine_name, note} = row;
