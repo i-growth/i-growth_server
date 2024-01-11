@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 import session from 'express-session';
 import multer from 'multer';
-import { AddChild, AddChildGrowthDetail, AddNews, CheckMidwifeAuth, CreateParent, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetNews, GetNewsByID, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, UpdateChild, UpdateParent, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
+import { AddChild, AddChildGrowthDetail, AddNews, CheckMidwifeAuth, CreateParent, DeleteNews, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetNews, GetNewsByID, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, UpdateChild, UpdateParent, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
 
 
 
@@ -84,6 +84,7 @@ router.put('/child/:child_id', UpdateChild);
 router.post('/add-news', uploadStorage.single('file'), AddNews);
 router.get('/news', GetNews);
 router.get('/news/:id', GetNewsByID);
+router.delete('/news/:id', DeleteNews);
 
 
 export default router;
