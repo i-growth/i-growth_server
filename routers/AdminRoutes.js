@@ -62,6 +62,13 @@ router.get('/check-auth', CheckAdminAuth);
 router.use(checkAuth);
 router.post('/admin', CrateAdmin);
 
+router.get('/admin-type', (req, res) => {
+  const isSupper = req.session.admin.admin_id.super == 1 ? true : false
+  res.json({
+    isSupperAdmin: isSupper
+  })
+})
+
 router.use((req, res, next) => {
   if(req.session.admin.admin_id.super == 1){
     res.status(401).json({
