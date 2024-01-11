@@ -39,6 +39,21 @@ export const GetAreaByID = async (req, res, next) => {
     }
 }
 
+export const GetSession = async (req, res, next) => {
+    const session = req.session;
+
+    if(session) {
+        return res.status(200).json({
+            session: session
+        })
+    }
+    else {
+        return res.status(404).json({
+            message: 'Session not found'
+        })
+    }
+}
+
 export const GetImageByID = async (req, res, next) => {
     const {id} = req.params;
     if(!id) {
