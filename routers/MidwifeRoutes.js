@@ -57,6 +57,12 @@ router.get('/check-auth', CheckMidwifeAuth);
 
 router.use(checkAuth);
 
+router.get('/area', (req, res) => {
+  res.json({
+    area : req.session.midwife.midwife_id.area_id
+  })
+});
+
 router.post('/parent', CreateParent);
 router.get('/parents', getAllParents);
 router.put('/parent/:guardian_nic', UpdateParent);
