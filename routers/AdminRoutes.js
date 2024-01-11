@@ -1,5 +1,5 @@
 import express from 'express';
-import { AddNews, AdminLogin, AdminLogout, CheckAdminAuth, CrateAdmin, CreateMidwife, CreateOfficer, DeleteMidwife, DeleteNews, DeleteOfficer, GetAllMidwifes, GetMidwifeByID, GetNews, GetNewsByID, GetOfficerByAreaID, GetOfficerByID, UpdateMidwife, UpdateOfficer, getAllOfficers } from '../methods/AdminMethod.js';
+import { AddNews, AdminLogin, AdminLogout, CheckAdminAuth, CrateAdmin, CreateMidwife, CreateOfficer, DeleteMidwife, DeleteNews, DeleteOfficer, GetAllAdmin, GetAllMidwifes, GetMidwifeByID, GetNews, GetNewsByID, GetOfficerByAreaID, GetOfficerByID, UpdateMidwife, UpdateOfficer, getAllOfficers } from '../methods/AdminMethod.js';
 const router = express.Router();
 import session from 'express-session';
 import multer from 'multer';
@@ -61,6 +61,7 @@ router.get('/check-auth', CheckAdminAuth);
 
 router.use(checkAuth);
 router.post('/admin', CrateAdmin);
+router.get('/admins', GetAllAdmin)
 
 router.get('/admin-type', (req, res) => {
   const isSupper = req.session.admin.admin_id.super == 1 ? true : false

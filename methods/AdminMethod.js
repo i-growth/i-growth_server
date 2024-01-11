@@ -92,6 +92,18 @@ export const CrateAdmin = async(req, res, next) => {
     }
 }
 
+export const GetAllAdmin = async(req, res, next) => {
+    try{
+        const [rows] = await pool.query('SELECT * FROM admin where super = 0');
+        return res.status(200).json(rows)
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
 export const AdminLogout = async(req, res, next) => {
     try{
         req.session.destroy();
