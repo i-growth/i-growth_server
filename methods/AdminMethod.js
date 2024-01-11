@@ -115,6 +115,29 @@ export const CreateMidwife = async(req, res, next) => {
     }
 }
 
+export const DeleteMidwife = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('DELETE FROM midwife WHERE midwife_id = ?', [id]);
+        if(rows.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'Midwife deleted'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'Midwife deleting failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+}
+
 export const GetAllMidwifes = async(req, res, next) => {
     try{
         const [rows] = await pool.query('SELECT midwife.*, area.area_name FROM midwife inner join area on midwife.area_id = area.area_id');
@@ -232,6 +255,28 @@ export const CreateOfficer = async(req, res, next) => {
         })
     }
     
+}
+
+export const DeleteOfficer = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('DELETE FROM medical_officer WHERE officer_id = ?', [id]);
+        if(rows.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'Officer deleted'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'Officer deleting failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
 }
 
 export const UpdateOfficer = async(req, res, next) => {

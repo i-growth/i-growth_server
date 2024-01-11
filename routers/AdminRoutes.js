@@ -1,5 +1,5 @@
 import express from 'express';
-import { AddNews, AdminLogin, AdminLogout, CheckAdminAuth, CreateMidwife, CreateOfficer, DeleteNews, GetAllMidwifes, GetMidwifeByID, GetNews, GetNewsByID, GetOfficerByAreaID, GetOfficerByID, UpdateMidwife, UpdateOfficer, getAllOfficers } from '../methods/AdminMethod.js';
+import { AddNews, AdminLogin, AdminLogout, CheckAdminAuth, CreateMidwife, CreateOfficer, DeleteMidwife, DeleteNews, DeleteOfficer, GetAllMidwifes, GetMidwifeByID, GetNews, GetNewsByID, GetOfficerByAreaID, GetOfficerByID, UpdateMidwife, UpdateOfficer, getAllOfficers } from '../methods/AdminMethod.js';
 const router = express.Router();
 import session from 'express-session';
 import multer from 'multer';
@@ -62,11 +62,14 @@ router.get('/check-auth', CheckAdminAuth);
 router.use(checkAuth);
 
 router.post('/create-midwife', CreateMidwife);
+router.delete('/midwife/:id', DeleteMidwife);
+
 router.get('/midwifes', GetAllMidwifes);
 router.get('/midwife/:id', GetMidwifeByID);
 router.put('/midwife/:id', UpdateMidwife);
 
 router.post('/create-officer', CreateOfficer);
+router.delete('/officer/:id', DeleteOfficer);
 router.put('/officer/:id', UpdateOfficer);
 router.post('/add-news', uploadStorage.single('file'), AddNews);
 router.get('/news', GetNews);
