@@ -387,3 +387,25 @@ export const GetNewsByID = async(req, res, next) => {
         })
     }
 }
+
+export const DeleteNews = async(req, res, next) => {
+    const { id } = req.params;
+    try{
+        const [rows] = await pool.query('DELETE FROM news_feed WHERE news_id = ?', [id]);
+        if(rows.affectedRows > 0) {
+            return res.status(200).json({
+                message: 'News deleted'
+            })
+        }
+        else {
+            return res.status(500).json({
+                message: 'News deleting failed'
+            })
+        }
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
