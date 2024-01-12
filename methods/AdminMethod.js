@@ -12,7 +12,7 @@ export const AdminLogin = async (req, res, next) => {
     }
 
     try {
-        const [rows] = await pool.query('SELECT id, Username, super, area_id FROM admin WHERE Username = ? AND password = ? LIMIT 1', [username, password]);
+        const [rows] = await pool.query('SELECT id, Username, super, district_id FROM admin WHERE Username = ? AND password = ? LIMIT 1', [username, password]);
 
         try {
             if (rows.length > 0) {
@@ -43,14 +43,14 @@ export const AdminLogin = async (req, res, next) => {
 }
 
 export const CrateAdmin = async (req, res, next) => {
-    const { username, area_id, email } = req.body;
+    const { username, district_id, email } = req.body;
 
     const password = GeneratePassword;
 
-    if (!username || !area_id || !email) {
+    if (!username || !district_id || !email) {
         return res.status(400).json({
             message: 'All fields are required',
-            require: 'username, area_id, email'
+            require: 'username, district_id, email'
         })
     }
 
@@ -61,7 +61,7 @@ export const CrateAdmin = async (req, res, next) => {
     const generated_username = username + digitOne + digitTwo + digitThree;
 
     try {
-        const [rows] = await pool.query('INSERT INTO admin (Username, password, area_id, email) VALUES (?, ?, ?, ?)', [generated_username, password, area_id, email]);
+        const [rows] = await pool.query('INSERT INTO admin (Username, password, district_id, email) VALUES (?, ?, ?, ?)', [generated_username, password, district_id, email]);
         if (rows.affectedRows > 0) {
             try {
                 await transporter.sendMail({
@@ -94,7 +94,7 @@ export const CrateAdmin = async (req, res, next) => {
 
 export const GetAllAdmin = async (req, res, next) => {
     try {
-        const [rows] = await pool.query('SELECT admin.*, area.area_id, area_name FROM admin inner join area on admin.area_id = area.area_id where super = 0');
+        const [rows] = await pool.query('SELECT admin.*, district.district_id, district_name FROM admin inner join district on admin.district_id = district.district_id where super = 0');
         return res.status(200).json(rows)
     }
     catch (err) {
@@ -137,12 +137,6 @@ export const CreateMidwife = async (req, res, next) => {
     if (!name || !service_start_date || !nic || !email || !phone || !service_id || !area_id) {
         return res.status(400).json({
             message: 'All fields are required'
-        })
-    }
-
-    if (req.session.admin.admin_id.area_id != area_id) {
-        return res.status(401).json({
-            message: 'Not permission'
         })
     }
 
@@ -224,9 +218,27 @@ export const DeleteMidwife = async (req, res, next) => {
 
 }
 
-export const GetAllMidwifes = async (req, res, next) => {
+//  get allowed areas for admin
+const GetAllowAreaIDForAdmin = async (admin_district_id) => {
     try {
-        const [rows] = await pool.query('SELECT midwife.*, area.area_name FROM midwife inner join area on midwife.area_id = area.area_id where midwife.area_id = ?', [req.session.admin.admin_id.area_id]);
+        const [rows] = await pool.query('SELECT area_id FROM area WHERE district_id = ?', [admin_district_id]);
+        return rows;
+    }
+    catch (err) {
+        return err.message;
+    }
+}
+
+export const GetAllMidwifes = async (req, res, next) => {
+    const admin_district_id = req.session.admin.admin_id.district_id;
+
+    const areaIDsWithKeys = await GetAllowAreaIDForAdmin(admin_district_id);
+    // get values
+    const area_ids = areaIDsWithKeys.map((area) => area.area_id);
+    const joinAreaIDs = area_ids.join(',');
+
+    try {
+        const [rows] = await pool.query(`SELECT midwife.*, area.area_name FROM midwife inner join area on midwife.area_id = area.area_id where midwife.area_id in (${joinAreaIDs})`, []);
         const rests = rows.map((row) => {
             const { password, ...rest } = row;
             return rest;
@@ -279,11 +291,11 @@ export const UpdateMidwife = async (req, res, next) => {
         const [rows] = await pool.query('SELECT area_id FROM midwife WHERE midwife_id = ? LIMIT 1', [id]);
         var area_id = rows[0].area_id;
 
-        if (req.session.admin.admin_id.area_id != area_id) {
-            return res.status(401).json({
-                message: 'Not permission'
-            })
-        }
+        // if (req.session.admin.admin_id.area_id != area_id) {
+        //     return res.status(401).json({
+        //         message: 'Not permission'
+        //     })
+        // }
     }
     catch (err) {
         return res.status(500).json({
@@ -323,11 +335,11 @@ export const CreateOfficer = async (req, res, next) => {
         })
     }
 
-    if (req.session.admin.admin_id.area_id != area_id) {
-        return res.status(401).json({
-            message: 'Not permission'
-        })
-    }
+    // if (req.session.admin.admin_id.area_id != area_id) {
+    //     return res.status(401).json({
+    //         message: 'Not permission'
+    //     })
+    // }
 
     const password = GeneratePassword;
 
@@ -391,6 +403,7 @@ export const DeleteOfficer = async (req, res, next) => {
 }
 
 export const UpdateOfficer = async (req, res, next) => {
+
     const { id } = req.params;
     const { officer_name, phone, service_id } = req.body;
 
@@ -411,11 +424,11 @@ export const UpdateOfficer = async (req, res, next) => {
         const [rows] = await pool.query('SELECT area_id FROM medical_officer WHERE officer_id = ? LIMIT 1', [id]);
         var area_id = rows[0].area_id;
 
-        if (req.session.admin.admin_id.area_id != area_id) {
-            return res.status(401).json({
-                message: 'Not permission'
-            })
-        }
+        // if (req.session.admin.admin_id.area_id != area_id) {
+        //     return res.status(401).json({
+        //         message: 'Not permission'
+        //     })
+        // }
     }
     catch (err) {
         return res.status(500).json({
@@ -446,8 +459,19 @@ export const UpdateOfficer = async (req, res, next) => {
 }
 
 export const getAllOfficers = async (req, res, next) => {
+    const admin_district_id = req.session.admin.admin_id.district_id;
+
+    const areaIDsWithKeys = await GetAllowAreaIDForAdmin(admin_district_id);
+    // get values
+    
     try {
-        const [rows] = await pool.query('SELECT *, area.area_name FROM medical_officer inner join area on medical_officer.area_id = area.area_id where medical_officer.area_id = ?', [req.session.admin.admin_id.area_id]);
+        const area_ids = areaIDsWithKeys.map((area) => area.area_id);
+        const joinAreaIDs = area_ids.join(',').toString();
+        console.log(joinAreaIDs);
+
+        // const [rows] = await pool.query('SELECT medical_officer.*, area.area_name, area.area_id FROM medical_officer inner join area on medical_officer.area_id = area.area_id where medical_officer.area_id in (?)', [joinAreaIDs]);
+        const [rows] = await pool.query('SELECT medical_officer.*, area.area_name, area.area_id FROM medical_officer inner join area on area.area_id = medical_officer.area_id where medical_officer.area_id in (?)', [area_ids]);
+        console.log(rows);
         const rests = rows.map((row) => {
             const { password, ...rest } = row;
             return rest;
@@ -575,6 +599,37 @@ export const DeleteNews = async (req, res, next) => {
                 message: 'News deleting failed'
             })
         }
+    }
+    catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetAdminAllowedArea = async (req, res, next) => {
+    const admin_district_id = req.session.admin.admin_id.district_id;
+
+    // const areaIDsWithKeys = await GetAllowAreaIDForAdmin(admin_district_id);
+    // // get values
+    // const area_ids = areaIDsWithKeys.map((area) => area.area_id);
+    // const joinAreaIDs = area_ids.join(',');
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM area WHERE district_id in (?)', [admin_district_id]);
+        return res.status(200).json(rows)
+    }
+    catch (err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetAllDistrict = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM district');
+        return res.status(200).json(rows)
     }
     catch (err) {
         return res.status(500).json({
