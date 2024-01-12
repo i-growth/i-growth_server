@@ -55,6 +55,8 @@ router.use(checkAuth);
 
 router.get('/check-auth', (req, res) => res.status(200).json({message: 'Authorized'}));
 
+router.get('/profile', GetOfficerProfile);
+
 router.post('/add-news', uploadStorage.single('file'), AddNews);
 router.get('/news', GetNews);
 router.get('/news/:id', GetNewsByID);
