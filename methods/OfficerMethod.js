@@ -142,6 +142,96 @@ export const GetOfficerProfile = async(req, res, next) => {
     }
 }
 
+export const UpdateOfficerProfile = async(req, res, next) => {
+    const officer_id = req.session.officer.officer_id.officer_id;
+    const { name, phone, old_password, new_password } = req.body;
+
+    if(!name || !phone) {
+        return res.status(400).json({
+            message: 'Please fill all fields'
+        })
+    }
+
+    if(new_password.length > 0 || old_password.length > 0){
+        if(!new_password || !old_password) {
+            return res.status(400).json({
+                message: 'you need provide old_password and new_password'
+            })
+        }
+
+        if(new_password.trim().length < 6){
+            return res.status(400).json({
+                message: 'password must be at least 6 characters'
+            })
+        }
+
+        try{
+            const [rows] = await pool.query('SELECT password FROM medical_officer WHERE officer_id = ? LIMIT 1', [officer_id]);
+            if(rows.length > 0) {
+                if(rows[0].password !== old_password) {
+                    return res.status(400).json({
+                        message: 'Old password is incorrect'
+                    })
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: 'Old password is incorrect'
+                })
+            }
+        
+        }
+        catch(err) {
+            return res.status(500).json({
+                message: err.message
+            })
+        }
+
+        //  update data
+        try{
+            const [rows] = await pool.query('UPDATE medical_officer SET officer_name = ?, phone = ?, password = ? WHERE officer_id = ?', [name, phone, new_password, officer_id]);
+            if(rows.affectedRows > 0) {
+                return res.status(200).json({
+                    message: 'Profile updated'
+                })
+            }
+            else {
+                return res.status(500).json({
+                    message: 'Profile updating failed'
+                })
+            }
+        }
+        catch(err) {
+            return res.status(500).json({
+                message: err.message
+            })
+        }
+    }
+    else{
+        // not update password
+        try{
+            const [rows] = await pool.query('UPDATE medical_officer SET officer_name = ?, phone = ? WHERE officer_id = ?', [name, phone, officer_id]);
+            if(rows.affectedRows > 0) {
+                return res.status(200).json({
+                    message: 'Profile updated'
+                })
+            }
+            else {
+                return res.status(500).json({
+                    message: 'Profile updating failed'
+                })
+            }
+        }
+        catch(err) {
+            return res.status(500).json({
+                message: err.message
+            })
+        }
+    }
+
+    
+}
+
 const cal_sd = (month) => {
     return {
         plus_3SD: -(0.0174718 * Math.pow(month, 2))  + (0.91498 * month) + 5.11339,
