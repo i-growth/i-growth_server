@@ -250,6 +250,7 @@ export const GetSummary = async(req, res, next) => {
 
     let DATA = {
         child_in_60_month: undefined,
+        total_parent: undefined,
         wight_group: {
             over_weight: 0,
             proper_weight: 0,
@@ -269,6 +270,20 @@ export const GetSummary = async(req, res, next) => {
             message: err.message
         })
     }
+
+
+    // get total parent
+    try{
+        const [rows] = await pool.query('SELECT COUNT(guardian_nic) as total FROM parent WHERE area_id = ?', [area_id]);
+        DATA.total_parent = rows[0].total;
+    }
+    catch(err) {
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+
+
 
     // WEIGHT GROUP
     let child_in_one_month = [];
