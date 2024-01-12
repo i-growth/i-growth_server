@@ -7,12 +7,12 @@ import multer from 'multer';
 
 
 router.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    next();
-  });
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 router.use(
   session({
@@ -26,14 +26,14 @@ router.use(
 );
 
 const checkAuth = (req, res, next) => {
-    if(req.session.officer) {
-        next();
-    }
-    else {
-        return res.status(401).json({
-            message: 'Unauthorized'
-        })
-    }
+  if (req.session.officer) {
+    next();
+  }
+  else {
+    return res.status(401).json({
+      message: 'Unauthorized'
+    })
+  }
 }
 
 const storage = multer.diskStorage({
@@ -53,18 +53,13 @@ router.post('/logout', Logout);
 
 router.use(checkAuth);
 
-router.get('/check-auth', (req, res) => res.status(200).json({message: 'Authorized'}));
-
+router.get('/check-auth', (req, res) => res.status(200).json({ message: 'Authorized' }));
 router.get('/profile', GetOfficerProfile);
-
 router.put('/profile', UpdateOfficerProfile);
-
 router.post('/add-news', uploadStorage.single('file'), AddNews);
 router.get('/news', GetNews);
 router.get('/news/:id', GetNewsByID);
 router.delete('/news/:id', DeleteNews);
-
-// View Profile
 router.get('/report-summary', GetSummary)
 
 

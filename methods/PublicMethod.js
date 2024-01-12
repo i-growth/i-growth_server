@@ -6,7 +6,7 @@ export const GetAllAreas = async (req, res, next) => {
         const [rows] = await pool.query('SELECT * FROM area');
         return res.status(200).json(rows)
     }
-    catch(err) {
+    catch (err) {
         return res.status(500).json({
             message: err.message
         })
@@ -14,15 +14,15 @@ export const GetAllAreas = async (req, res, next) => {
 }
 
 export const GetAreaByID = async (req, res, next) => {
-    const {id} = req.params;
-    if(!id) {
+    const { id } = req.params;
+    if (!id) {
         return res.status(400).json({
             message: 'Please fill all fields'
         })
     }
     try {
         const [rows] = await pool.query('SELECT * FROM area WHERE area_id = ? LIMIT 1', [id]);
-        if(rows.length > 0) {
+        if (rows.length > 0) {
             const data = rows[0]
             return res.status(200).send(data)
         }
@@ -32,7 +32,7 @@ export const GetAreaByID = async (req, res, next) => {
             })
         }
     }
-    catch(err) {
+    catch (err) {
         return res.status(500).json({
             message: err.message
         })
@@ -42,7 +42,7 @@ export const GetAreaByID = async (req, res, next) => {
 export const GetSession = async (req, res, next) => {
     const session = req.session;
 
-    if(session) {
+    if (session) {
         return res.status(200).json({
             session: session
         })
@@ -55,8 +55,8 @@ export const GetSession = async (req, res, next) => {
 }
 
 export const GetImageByID = async (req, res, next) => {
-    const {id} = req.params;
-    if(!id) {
+    const { id } = req.params;
+    if (!id) {
         return res.status(400).json({
             message: 'Please fill all fields'
         })
@@ -67,25 +67,25 @@ export const GetImageByID = async (req, res, next) => {
     res.sendFile(image_path);
 }
 
-export const GetNews = async(req, res, next) => {
-    try{
+export const GetNews = async (req, res, next) => {
+    try {
         const [rows] = await pool.query('SELECT * FROM news_feed order by date desc');
         return res.status(200).json(rows)
     }
-    catch(err) {
+    catch (err) {
         return res.status(500).json({
             message: err.message
         })
     }
 }
 
-export const GetNewsByID = async(req, res, next) => {
+export const GetNewsByID = async (req, res, next) => {
     const { id } = req.params;
-    try{
+    try {
         const [rows] = await pool.query('SELECT * FROM news_feed WHERE news_id = ? LIMIT 1', [id]);
         return res.status(200).json(rows[0])
     }
-    catch(err) {
+    catch (err) {
         return res.status(500).json({
             message: err.message
         })

@@ -5,5 +5,5 @@ export const transporter = nodemailer.createTransport({
     auth: {
       user: "uc.chamod.public@gmail.com",
       pass: "jhqwpvtnluihkawp"
-    },
-  });
+    },
+});

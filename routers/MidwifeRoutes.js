@@ -27,14 +27,14 @@ router.use(
 );
 
 const checkAuth = (req, res, next) => {
-    if(req.session.midwife) {
-        next();
-    }
-    else {
-        return res.status(401).json({
-            message: 'Unauthorized'
-        })
-    }
+  if (req.session.midwife) {
+    next();
+  }
+  else {
+    return res.status(401).json({
+      message: 'Unauthorized'
+    })
+  }
 }
 
 const storage = multer.diskStorage({
@@ -59,7 +59,7 @@ router.use(checkAuth);
 
 router.get('/area', (req, res) => {
   res.json({
-    area : req.session.midwife.midwife_id.area_id
+    area: req.session.midwife.midwife_id.area_id
   })
 });
 
@@ -73,20 +73,14 @@ router.post('/child', AddChild);
 router.post('/child/growth_detail/:child_id', AddChildGrowthDetail);
 router.get('/child/growth_detail/:child_id', GetChildGrowthDetailByID);
 router.get('/child/last-growth_detail/:child_id', GetLastChildGrowthDetail);
-// FOR TABLE
 router.get('/child/sd_measurements', GetSDMeasurements);
-
 router.get('/child/vaccine', GetAllVaccine);
 router.get('/child/vaccine/:child_id', GetVaccineTableForChild);
 router.post('/child/vaccine/:child_id/:vaccine_id', VaccineGetByChild);
-
-// Get growth detail chart data
 router.get('/child/growth-detail-chart/:child_id', GetGrowthDetailsChart);
-
 router.get('/child', GetAllChild);
 router.get('/child/:id', GetChildByID);
 router.put('/child/:child_id', UpdateChild);
-
 router.post('/add-news', uploadStorage.single('file'), AddNews);
 router.get('/news', GetNews);
 router.get('/news/:id', GetNewsByID);
