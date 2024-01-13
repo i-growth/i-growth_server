@@ -74,6 +74,7 @@ export const CrateAdmin = async (req, res, next) => {
                 res.status(200).json({ message: 'Admin created' })
             }
             catch (err) {
+                console.log(err);
                 return res.status(500).json({
                     message: "Can't send username and password to admin"
                 })
