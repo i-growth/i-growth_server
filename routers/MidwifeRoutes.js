@@ -76,7 +76,8 @@ router.get('/child/last-growth_detail/:child_id', GetLastChildGrowthDetail);
 router.get('/child/sd_measurements', GetSDMeasurements);
 router.get('/child/vaccine', GetAllVaccine);
 router.get('/child/vaccine/:child_id', GetVaccineTableForChild);
-router.post('/child/vaccine/:child_id/:vaccine_id', VaccineGetByChild);
+
+router.post('/child/vaccine/:child_id/:time_table_id/:vaccine_id', VaccineGetByChild);
 router.get('/child/growth-detail-chart/:child_id', GetGrowthDetailsChart);
 router.get('/child', GetAllChild);
 router.get('/child/:id', GetChildByID);
