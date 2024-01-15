@@ -827,3 +827,37 @@ export const DeleteNews = async (req, res, next) => {
         })
     }
 }
+
+export const GetAllActivities_ = async (req, res, next) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM activities');
+        return res.status(200).json(rows)
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const GetChildActivities = async (req, res, next) => {
+    const { child_id } = req.params;
+
+    if(!child_id){
+        return res.status(400).json({
+            message: 'Please add params child_id',
+        })
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT done_activities.*, child.*, activities.*, TIMESTAMPDIFF(MONTH, child.child_birthday, CURDATE()) AS months_difference FROM done_activities inner join child on child.child_id = done_activities.child_id inner join activities on activities.activity_id = done_activities.activity_id WHERE done_activities.child_id = ?', [child_id]);
+        return res.status(200).json(rows)
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
