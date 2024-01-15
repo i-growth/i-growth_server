@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 import session from 'express-session';
 import multer from 'multer';
-import { AddChild, AddChildGrowthDetail, AddNews, CheckMidwifeAuth, CreateParent, DeleteNews, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetNews, GetNewsByID, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, MidwifeLogin, MidwifeLogout, UpdateChild, UpdateParent, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
+import { AddChild, AddChildGrowthDetail, AddNews, CheckMidwifeAuth, CreateParent, DeleteNews, GetAllChild, GetAllVaccine, GetChildByID, GetChildGrowthDetailByID, GetGrowthDetailsChart, GetLastChildGrowthDetail, GetNews, GetNewsByID, GetParentByID, GetSDMeasurements, GetVaccineTableForChild, LastGrowthData, MidwifeLogin, MidwifeLogout, UpdateChild, UpdateParent, VaccineGetByChild, getAllParents } from '../methods/MidwifeMethod.js';
 
 
 
@@ -73,6 +73,7 @@ router.post('/child', AddChild);
 router.post('/child/growth_detail/:child_id', AddChildGrowthDetail);
 router.get('/child/growth_detail/:child_id', GetChildGrowthDetailByID);
 router.get('/child/last-growth_detail/:child_id', GetLastChildGrowthDetail);
+router.get('/child/last-growth-data/:child_id', LastGrowthData);
 router.get('/child/sd_measurements', GetSDMeasurements);
 router.get('/child/vaccine', GetAllVaccine);
 router.get('/child/vaccine/:child_id', GetVaccineTableForChild);

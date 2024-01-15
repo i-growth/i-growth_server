@@ -391,12 +391,11 @@ export const GetLastChildGrowthDetail = async (req, res, next) => {
     }
 
     try {
-        const [rows] = await pool.query('SELECT growth_detail.*, child.child_name, child.area_id FROM growth_detail join child on child.child_id = growth_detail.child_id WHERE growth_detail.child_id = ? ORDER BY month DESC LIMIT 1', [child_id]);
-
+        const [rows] = await pool.query('SELECT growth_detail.*, child.child_name, child.area_id as area_id , TIMESTAMPDIFF(MONTH, child.child_birthday, CURDATE()) AS months_difference FROM growth_detail join child on child.child_id = growth_detail.child_id WHERE growth_detail.child_id = ? ORDER BY month DESC LIMIT 1', [child_id]);
+        
         if (rows.length < 1) {
-
             try {
-                const [child] = await pool.query('SELECT * FROM child WHERE child_id = ?', [child_id]);
+                const [child] = await pool.query('SELECT *, TIMESTAMPDIFF(MONTH, child_birthday, CURDATE()) AS months_difference FROM child WHERE child_id = ?', [child_id]);
                 if (child.length < 1) return res.status(404).json({ message: 'Child not found' })
                 return res.status(200).json({
                     message: 'Child growth detail not found',
@@ -411,15 +410,40 @@ export const GetLastChildGrowthDetail = async (req, res, next) => {
             // return res.status(404).json({message: 'Child growth detail not found'})
         }
 
+        console.log(req.session.midwife.midwife_id.area_id, rows[0].area_id);
         if (req.session.midwife.midwife_id.area_id != rows[0].area_id) {
             return res.status(200).json({
                 message: 'Not privileges'
             })
         }
 
+        console.log(rows[0]);
         return res.status(200).json(rows[0])
     }
     catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            message: err.message
+        })
+    }
+}
+
+export const LastGrowthData = async (req, res, next) => {
+    const { child_id } = req.params;
+
+    if (!child_id) {
+        return res.status(400).json({
+            message: 'Please add params child_id',
+        })
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM growth_detail WHERE child_id = ? ORDER BY month DESC LIMIT 1', [child_id]);
+        if(rows.length < 1) return res.status(200).send([])
+        return res.status(200).json(rows[0])
+    }
+    catch (err) {
+        console.log(err);
         return res.status(500).json({
             message: err.message
         })
@@ -450,23 +474,23 @@ export const GetSDMeasurements = async (req, res, next) => {
         var sixtyMonths_copy = {};
 
         // Create 60 arrays
-        for (var i = 2; i <= 60; i++) {
+        for (var i = 1; i <= 60; i++) {
             sixtyMonths[i] = [];
             sixtyMonths_copy[i] = [];
         }
 
-        console.log(rows);
         // Add data to arrays
         rows.forEach(row => {
-            if (row.months_difference >= 2 && row.months_difference <= 60) sixtyMonths[row.months_difference].push(row);
+            if (row.months_difference >= 1 && row.months_difference <= 60) sixtyMonths[row.months_difference].push(row);
             // console.log(row.months_difference);
         })
+
+        console.log(sixtyMonths);
 
         // Calculate SD
         Object.keys(sixtyMonths).map((key) => {
 
             if (sixtyMonths[key].length > 0) {
-
                 sixtyMonths[key].forEach((row) => {
 
                     let caled_sd = cal_sd(row.months_difference);
@@ -539,7 +563,7 @@ export const GetSDMeasurements = async (req, res, next) => {
                 }
             }
         })
-
+        // console.log(sixtyMonths_copy);
         res.send(sixtyMonths_copy)
     }
     catch (err) {
