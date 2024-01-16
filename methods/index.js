@@ -1,4 +1,5 @@
 export * from './AdminMethod'
 export * from './MidwifeMethod'
 export * from './OfficerMethod'
+export * from './ParentMethod'
 export * from './PublicMethod'
